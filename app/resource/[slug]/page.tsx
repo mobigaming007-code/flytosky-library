@@ -1,6 +1,7 @@
 import MediaViewer from "@/components/MediaViewer";
 import { getResourceBySlug } from "@/lib/api";
 import Link from "next/link";
+import { notFound } from "next/navigation";
 
 type ResourceDetailPageProps = {
   params: Promise<{
@@ -12,7 +13,13 @@ export default async function ResourceDetailPage({
   params,
 }: ResourceDetailPageProps) {
   const { slug } = await params;
-  const resource = await getResourceBySlug(slug);
+  let resource;
+
+  try {
+    resource = await getResourceBySlug(slug);
+  } catch {
+    notFound();
+  }
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-12">
