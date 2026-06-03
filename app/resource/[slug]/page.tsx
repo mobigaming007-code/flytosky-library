@@ -1,3 +1,4 @@
+import AudioExperience from "@/components/AudioExperience";
 import MediaViewer from "@/components/MediaViewer";
 import ResourceCard from "@/components/ResourceCard";
 import ShareButtons from "@/components/ShareButtons";
@@ -16,13 +17,9 @@ export default async function ResourceDetailPage({
 }: ResourceDetailPageProps) {
   const { slug } = await params;
 
-  let resource;
-
-  try {
-    resource = await getResourceBySlug(slug);
-  } catch {
+  const resource = await getResourceBySlug(slug).catch(() => {
     notFound();
-  }
+  });
 
   const [categories, allResources] = await Promise.all([
     getCategories(),
@@ -32,6 +29,15 @@ export default async function ResourceDetailPage({
   const category = categories.find(
     (item) => item.code === resource.categoryCode,
   );
+
+  const categoryName = category?.name || resource.categoryCode;
+
+  const isAudioExperience =
+    resource.type === "audio" ||
+    (resource.hasAudio &&
+      !resource.hasVideo &&
+      !resource.hasPdf &&
+      !resource.hasFlipbook);
 
   const relatedResources = allResources
     .filter((item) => item.id !== resource.id)
@@ -45,109 +51,131 @@ export default async function ResourceDetailPage({
   return (
     <div className="bg-slate-50">
       <div className="mx-auto max-w-6xl px-4 py-12">
-        <Link href="/library" className="text-sm font-semibold text-blue-600">
-          ← Quay lại thư viện
-        </Link>
+        {isAudioExperience ? (
+          <AudioExperience resource={resource} categoryName={categoryName} />
+        ) : (
+          <>
+            <Link
+              href="/library"
+              className="text-sm font-semibold text-blue-600 hover:text-blue-700"
+            >
+              ← Quay lại thư viện
+            </Link>
 
-        <div className="mt-8 grid gap-10 lg:grid-cols-[1fr_360px]">
-          <div>
-            <div className="mb-6">
-              <div className="mb-4 flex flex-wrap gap-2">
-                {resource.hasVideo && <Badge color="blue" text="Video" />}
-                {resource.hasPdf && <Badge color="orange" text="PDF" />}
-                {resource.hasAudio && <Badge color="green" text="Audio" />}
-                {resource.hasFlipbook && (
-                  <Badge color="purple" text="Sách điện tử" />
-                )}
+            <div className="mt-8 grid gap-10 lg:grid-cols-[1fr_360px]">
+              <div>
+                <div className="mb-6">
+                  <div className="mb-4 flex flex-wrap gap-2">
+                    {resource.hasVideo && <Badge color="blue" text="Video" />}
+                    {resource.hasPdf && <Badge color="orange" text="PDF" />}
+                    {resource.hasAudio && <Badge color="green" text="Audio" />}
+                    {resource.hasFlipbook && (
+                      <Badge color="purple" text="Sách điện tử" />
+                    )}
+                  </div>
+
+                  <h1 className="text-4xl font-extrabold leading-tight text-slate-900">
+                    {resource.title}
+                  </h1>
+
+                  <p className="mt-5 text-lg leading-8 text-slate-600">
+                    {resource.shortDescription}
+                  </p>
+
+                  <div className="mt-6 flex flex-wrap gap-3">
+                    <ShareButtons title={resource.title} />
+
+                    {youtubeOriginalUrl && (
+                      <a
+                        href={youtubeOriginalUrl}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="inline-flex rounded-full border border-slate-200 bg-white px-5 py-2 text-sm font-semibold text-slate-700 hover:border-blue-500 hover:text-blue-600"
+                      >
+                        Mở video gốc
+                      </a>
+                    )}
+
+                    {resource.pdfUrl && (
+                      <a
+                        href={resource.pdfUrl}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="inline-flex rounded-full border border-slate-200 bg-white px-5 py-2 text-sm font-semibold text-slate-700 hover:border-orange-500 hover:text-orange-600"
+                      >
+                        Mở / tải PDF gốc
+                      </a>
+                    )}
+
+                    {resource.audioUrl && (
+                      <a
+                        href={resource.audioUrl}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="inline-flex rounded-full border border-slate-200 bg-white px-5 py-2 text-sm font-semibold text-slate-700 hover:border-green-500 hover:text-green-600"
+                      >
+                        Mở / tải audio gốc
+                      </a>
+                    )}
+
+                    {resource.flipbookUrl && (
+                      <a
+                        href={resource.flipbookUrl}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="inline-flex rounded-full border border-slate-200 bg-white px-5 py-2 text-sm font-semibold text-slate-700 hover:border-purple-500 hover:text-purple-600"
+                      >
+                        Mở sách điện tử
+                      </a>
+                    )}
+                  </div>
+                </div>
+
+                <MediaViewer resource={resource} />
               </div>
 
-              <h1 className="text-4xl font-extrabold leading-tight text-slate-900">
-                {resource.title}
-              </h1>
+              <aside className="h-fit rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
+                <img
+                  src={
+                    resource.coverUrl ||
+                    "https://placehold.co/800x450?text=Fly+To+Sky+Library"
+                  }
+                  alt={resource.title}
+                  className="aspect-video w-full rounded-2xl bg-slate-100 object-cover"
+                />
 
-              <p className="mt-5 text-lg leading-8 text-slate-600">
-                {resource.shortDescription}
-              </p>
+                <div className="mt-6 space-y-4 text-sm">
+                  <Info label="Chủ đề" value={categoryName} />
+                  <Info label="Tác giả/Nguồn" value={resource.author} />
+                  <Info label="Nguồn gốc" value={resource.sourceOrigin} />
+                  <Info label="Năm xuất bản" value={resource.publishYear} />
+                  <Info label="Ngôn ngữ" value={resource.language} />
+                  <Info label="Từ khóa" value={resource.tags} />
+                  <Info label="Ngày cập nhật" value={resource.updatedAt} />
+                </div>
 
-              <div className="mt-6 flex flex-wrap gap-3">
-                <ShareButtons title={resource.title} />
-
-                {youtubeOriginalUrl && (
-                  <a
-                    href={youtubeOriginalUrl}
-                    target="_blank"
-                    className="inline-flex rounded-full border border-slate-200 bg-white px-5 py-2 text-sm font-semibold text-slate-700 hover:border-blue-500 hover:text-blue-600"
-                  >
-                    Mở video gốc
-                  </a>
+                {resource.detailDescription && (
+                  <div className="mt-6 border-t border-slate-100 pt-6">
+                    <h2 className="font-bold text-slate-900">Mô tả chi tiết</h2>
+                    <p className="mt-3 whitespace-pre-line text-sm leading-6 text-slate-600">
+                      {resource.detailDescription}
+                    </p>
+                  </div>
                 )}
 
-                {resource.pdfUrl && (
-                  <a
-                    href={resource.pdfUrl}
-                    target="_blank"
-                    className="inline-flex rounded-full border border-slate-200 bg-white px-5 py-2 text-sm font-semibold text-slate-700 hover:border-orange-500 hover:text-orange-600"
-                  >
-                    Mở / tải PDF gốc
-                  </a>
-                )}
-
-                {resource.audioUrl && (
-                  <a
-                    href={resource.audioUrl}
-                    target="_blank"
-                    className="inline-flex rounded-full border border-slate-200 bg-white px-5 py-2 text-sm font-semibold text-slate-700 hover:border-green-500 hover:text-green-600"
-                  >
-                    Mở / tải audio gốc
-                  </a>
-                )}
-              </div>
+                <div className="mt-6 border-t border-slate-100 pt-6">
+                  <h2 className="font-bold text-slate-900">
+                    Ghi chú bản quyền
+                  </h2>
+                  <p className="mt-3 whitespace-pre-line text-sm leading-6 text-slate-600">
+                    {resource.copyrightNote ||
+                      "Tài liệu được chia sẻ nhằm mục đích giáo dục, thiện nguyện và cộng đồng. Vui lòng kiểm tra quyền sử dụng nội dung trước khi tái đăng hoặc khai thác lại."}
+                  </p>
+                </div>
+              </aside>
             </div>
-
-            <MediaViewer resource={resource} />
-          </div>
-
-          <aside className="h-fit rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
-            <img
-              src={
-                resource.coverUrl ||
-                "https://placehold.co/800x450?text=Fly+To+Sky+Library"
-              }
-              alt={resource.title}
-              className="aspect-video w-full rounded-2xl bg-slate-100 object-cover"
-            />
-
-            <div className="mt-6 space-y-4 text-sm">
-              <Info
-                label="Chủ đề"
-                value={category?.name || resource.categoryCode}
-              />
-              <Info label="Tác giả/Nguồn" value={resource.author} />
-              <Info label="Nguồn gốc" value={resource.sourceOrigin} />
-              <Info label="Năm xuất bản" value={resource.publishYear} />
-              <Info label="Ngôn ngữ" value={resource.language} />
-              <Info label="Từ khóa" value={resource.tags} />
-              <Info label="Ngày cập nhật" value={resource.updatedAt} />
-            </div>
-
-            {resource.detailDescription && (
-              <div className="mt-6 border-t border-slate-100 pt-6">
-                <h2 className="font-bold text-slate-900">Mô tả chi tiết</h2>
-                <p className="mt-3 whitespace-pre-line text-sm leading-6 text-slate-600">
-                  {resource.detailDescription}
-                </p>
-              </div>
-            )}
-
-            <div className="mt-6 border-t border-slate-100 pt-6">
-              <h2 className="font-bold text-slate-900">Ghi chú bản quyền</h2>
-              <p className="mt-3 whitespace-pre-line text-sm leading-6 text-slate-600">
-                {resource.copyrightNote ||
-                  "Tài liệu được chia sẻ nhằm mục đích giáo dục, thiện nguyện và cộng đồng. Vui lòng kiểm tra quyền sử dụng nội dung trước khi tái đăng hoặc khai thác lại."}
-              </p>
-            </div>
-          </aside>
-        </div>
+          </>
+        )}
 
         <section className="mt-16">
           <div className="mb-6 flex items-end justify-between gap-4">
@@ -158,14 +186,20 @@ export default async function ResourceDetailPage({
               <h2 className="mt-2 text-3xl font-extrabold text-slate-900">
                 Tài liệu liên quan
               </h2>
+              <p className="mt-3 max-w-2xl text-slate-600">
+                Các nội dung khác trong cùng chủ đề{" "}
+                <span className="font-semibold">{categoryName}</span>.
+              </p>
             </div>
 
-            <Link
-              href={`/category/${category?.slug || ""}`}
-              className="hidden rounded-full border border-slate-200 bg-white px-5 py-2 text-sm font-semibold text-slate-700 hover:border-blue-500 hover:text-blue-600 md:inline-flex"
-            >
-              Xem chủ đề này
-            </Link>
+            {category?.slug && (
+              <Link
+                href={`/category/${category.slug}`}
+                className="hidden rounded-full border border-slate-200 bg-white px-5 py-2 text-sm font-semibold text-slate-700 hover:border-blue-500 hover:text-blue-600 md:inline-flex"
+              >
+                Xem chủ đề này
+              </Link>
+            )}
           </div>
 
           {relatedResources.length > 0 ? (

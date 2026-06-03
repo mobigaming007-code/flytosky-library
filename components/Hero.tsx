@@ -6,7 +6,7 @@ type HeroProps = {
 
 export default function Hero({ config }: HeroProps) {
   return (
-    <section className="relative overflow-hidden bg-gradient-to-br from-blue-700 via-blue-600 to-sky-500">
+    <section className="relative overflow-hidden bg-linear-to-br from-blue-700 via-blue-600 to-sky-500">
       <div className="absolute inset-0 opacity-20">
         <div className="absolute -left-20 top-20 h-72 w-72 rounded-full bg-white blur-3xl" />
         <div className="absolute bottom-0 right-0 h-96 w-96 rounded-full bg-orange-300 blur-3xl" />
@@ -46,7 +46,7 @@ export default function Hero({ config }: HeroProps) {
           </div>
         </div>
 
-        <div className="rounded-[2rem] bg-white/15 p-4 shadow-2xl ring-1 ring-white/20 backdrop-blur">
+        <div className="rounded-4xl bg-white/15 p-4 shadow-2xl ring-1 ring-white/20 backdrop-blur">
           <div className="rounded-3xl bg-white p-6">
             <div className="mb-5 flex items-center gap-3">
               <img
