@@ -1,5 +1,7 @@
 import MediaViewer from "@/components/MediaViewer";
-import { getResourceBySlug } from "@/lib/api";
+import ResourceCard from "@/components/ResourceCard";
+import ShareButtons from "@/components/ShareButtons";
+import { getCategories, getResourceBySlug, getResources } from "@/lib/api";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
@@ -13,6 +15,7 @@ export default async function ResourceDetailPage({
   params,
 }: ResourceDetailPageProps) {
   const { slug } = await params;
+
   let resource;
 
   try {
@@ -21,80 +24,168 @@ export default async function ResourceDetailPage({
     notFound();
   }
 
+  const [categories, allResources] = await Promise.all([
+    getCategories(),
+    getResources(),
+  ]);
+
+  const category = categories.find(
+    (item) => item.code === resource.categoryCode,
+  );
+
+  const relatedResources = allResources
+    .filter((item) => item.id !== resource.id)
+    .filter((item) => item.categoryCode === resource.categoryCode)
+    .slice(0, 3);
+
+  const youtubeOriginalUrl = resource.youtubeId
+    ? `https://www.youtube.com/watch?v=${resource.youtubeId}`
+    : "";
+
   return (
-    <div className="mx-auto max-w-6xl px-4 py-12">
-      <Link href="/library" className="text-sm font-semibold text-blue-600">
-        ← Quay lại thư viện
-      </Link>
+    <div className="bg-slate-50">
+      <div className="mx-auto max-w-6xl px-4 py-12">
+        <Link href="/library" className="text-sm font-semibold text-blue-600">
+          ← Quay lại thư viện
+        </Link>
 
-      <div className="mt-8 grid gap-10 lg:grid-cols-[1fr_360px]">
-        <div>
-          <div className="mb-6">
-            <div className="mb-4 flex flex-wrap gap-2">
-              {resource.hasVideo && (
-                <span className="rounded-full bg-blue-50 px-3 py-1 text-xs font-semibold text-blue-700">
-                  Video
-                </span>
-              )}
+        <div className="mt-8 grid gap-10 lg:grid-cols-[1fr_360px]">
+          <div>
+            <div className="mb-6">
+              <div className="mb-4 flex flex-wrap gap-2">
+                {resource.hasVideo && <Badge color="blue" text="Video" />}
+                {resource.hasPdf && <Badge color="orange" text="PDF" />}
+                {resource.hasAudio && <Badge color="green" text="Audio" />}
+                {resource.hasFlipbook && (
+                  <Badge color="purple" text="Sách điện tử" />
+                )}
+              </div>
 
-              {resource.hasPdf && (
-                <span className="rounded-full bg-orange-50 px-3 py-1 text-xs font-semibold text-orange-700">
-                  PDF
-                </span>
-              )}
+              <h1 className="text-4xl font-extrabold leading-tight text-slate-900">
+                {resource.title}
+              </h1>
 
-              {resource.hasAudio && (
-                <span className="rounded-full bg-green-50 px-3 py-1 text-xs font-semibold text-green-700">
-                  Audio
-                </span>
-              )}
+              <p className="mt-5 text-lg leading-8 text-slate-600">
+                {resource.shortDescription}
+              </p>
+
+              <div className="mt-6 flex flex-wrap gap-3">
+                <ShareButtons title={resource.title} />
+
+                {youtubeOriginalUrl && (
+                  <a
+                    href={youtubeOriginalUrl}
+                    target="_blank"
+                    className="inline-flex rounded-full border border-slate-200 bg-white px-5 py-2 text-sm font-semibold text-slate-700 hover:border-blue-500 hover:text-blue-600"
+                  >
+                    Mở video gốc
+                  </a>
+                )}
+
+                {resource.pdfUrl && (
+                  <a
+                    href={resource.pdfUrl}
+                    target="_blank"
+                    className="inline-flex rounded-full border border-slate-200 bg-white px-5 py-2 text-sm font-semibold text-slate-700 hover:border-orange-500 hover:text-orange-600"
+                  >
+                    Mở / tải PDF gốc
+                  </a>
+                )}
+
+                {resource.audioUrl && (
+                  <a
+                    href={resource.audioUrl}
+                    target="_blank"
+                    className="inline-flex rounded-full border border-slate-200 bg-white px-5 py-2 text-sm font-semibold text-slate-700 hover:border-green-500 hover:text-green-600"
+                  >
+                    Mở / tải audio gốc
+                  </a>
+                )}
+              </div>
             </div>
 
-            <h1 className="text-4xl font-extrabold leading-tight text-slate-900">
-              {resource.title}
-            </h1>
-
-            <p className="mt-5 text-lg leading-8 text-slate-600">
-              {resource.shortDescription}
-            </p>
+            <MediaViewer resource={resource} />
           </div>
 
-          <MediaViewer resource={resource} />
-        </div>
+          <aside className="h-fit rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
+            <img
+              src={
+                resource.coverUrl ||
+                "https://placehold.co/800x450?text=Fly+To+Sky+Library"
+              }
+              alt={resource.title}
+              className="aspect-video w-full rounded-2xl bg-slate-100 object-cover"
+            />
 
-        <aside className="h-fit rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
-          <img
-            src={
-              resource.coverUrl ||
-              "https://placehold.co/800x450?text=Fly+To+Sky+Library"
-            }
-            alt={resource.title}
-            className="aspect-video w-full rounded-2xl object-cover"
-          />
+            <div className="mt-6 space-y-4 text-sm">
+              <Info
+                label="Chủ đề"
+                value={category?.name || resource.categoryCode}
+              />
+              <Info label="Tác giả/Nguồn" value={resource.author} />
+              <Info label="Nguồn gốc" value={resource.sourceOrigin} />
+              <Info label="Năm xuất bản" value={resource.publishYear} />
+              <Info label="Ngôn ngữ" value={resource.language} />
+              <Info label="Từ khóa" value={resource.tags} />
+              <Info label="Ngày cập nhật" value={resource.updatedAt} />
+            </div>
 
-          <div className="mt-6 space-y-4 text-sm">
-            <Info label="Chủ đề" value={resource.categoryCode} />
-            <Info label="Tác giả/Nguồn" value={resource.author} />
-            <Info label="Năm xuất bản" value={resource.publishYear} />
-            <Info label="Ngôn ngữ" value={resource.language} />
-            <Info label="Từ khóa" value={resource.tags} />
-          </div>
+            {resource.detailDescription && (
+              <div className="mt-6 border-t border-slate-100 pt-6">
+                <h2 className="font-bold text-slate-900">Mô tả chi tiết</h2>
+                <p className="mt-3 whitespace-pre-line text-sm leading-6 text-slate-600">
+                  {resource.detailDescription}
+                </p>
+              </div>
+            )}
 
-          {resource.detailDescription && (
             <div className="mt-6 border-t border-slate-100 pt-6">
-              <h2 className="font-bold text-slate-900">Mô tả chi tiết</h2>
+              <h2 className="font-bold text-slate-900">Ghi chú bản quyền</h2>
               <p className="mt-3 whitespace-pre-line text-sm leading-6 text-slate-600">
-                {resource.detailDescription}
+                {resource.copyrightNote ||
+                  "Tài liệu được chia sẻ nhằm mục đích giáo dục, thiện nguyện và cộng đồng. Vui lòng kiểm tra quyền sử dụng nội dung trước khi tái đăng hoặc khai thác lại."}
               </p>
             </div>
+          </aside>
+        </div>
+
+        <section className="mt-16">
+          <div className="mb-6 flex items-end justify-between gap-4">
+            <div>
+              <p className="text-sm font-bold uppercase tracking-wide text-orange-500">
+                Gợi ý tiếp theo
+              </p>
+              <h2 className="mt-2 text-3xl font-extrabold text-slate-900">
+                Tài liệu liên quan
+              </h2>
+            </div>
+
+            <Link
+              href={`/category/${category?.slug || ""}`}
+              className="hidden rounded-full border border-slate-200 bg-white px-5 py-2 text-sm font-semibold text-slate-700 hover:border-blue-500 hover:text-blue-600 md:inline-flex"
+            >
+              Xem chủ đề này
+            </Link>
+          </div>
+
+          {relatedResources.length > 0 ? (
+            <div className="grid gap-6 md:grid-cols-3">
+              {relatedResources.map((item) => (
+                <ResourceCard key={item.id} resource={item} />
+              ))}
+            </div>
+          ) : (
+            <div className="rounded-3xl border border-dashed border-slate-300 bg-white p-8 text-center text-slate-500">
+              Chưa có tài liệu liên quan trong cùng chủ đề.
+            </div>
           )}
-        </aside>
+        </section>
       </div>
     </div>
   );
 }
 
-function Info({ label, value }: { label: string; value: string }) {
+function Info({ label, value }: { label: string; value?: string }) {
   if (!value) return null;
 
   return (
@@ -102,5 +193,24 @@ function Info({ label, value }: { label: string; value: string }) {
       <p className="font-semibold text-slate-900">{label}</p>
       <p className="mt-1 text-slate-600">{value}</p>
     </div>
+  );
+}
+
+function Badge({ text, color }: { text: string; color: string }) {
+  const classes: Record<string, string> = {
+    blue: "bg-blue-50 text-blue-700",
+    orange: "bg-orange-50 text-orange-700",
+    green: "bg-green-50 text-green-700",
+    purple: "bg-purple-50 text-purple-700",
+  };
+
+  return (
+    <span
+      className={`rounded-full px-3 py-1 text-xs font-semibold ${
+        classes[color] || "bg-slate-100 text-slate-700"
+      }`}
+    >
+      {text}
+    </span>
   );
 }

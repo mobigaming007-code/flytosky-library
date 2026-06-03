@@ -14,8 +14,10 @@ export default function Header() {
           </div>
 
           <div>
-            <p className="text-base font-bold text-slate-900">Fly To Sky</p>
-            <p className="text-xs text-slate-500">Thư viện số</p>
+            <p className="text-base font-bold text-slate-900">
+              Hệ thống từ thiện Fly To Sky
+            </p>
+            <p className="text-xs text-slate-500">Nền tảng thư viện số</p>
           </div>
         </Link>
 

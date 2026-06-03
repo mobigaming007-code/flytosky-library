@@ -20,6 +20,8 @@ export type Resource = {
   audioUrl: string;
   audioEmbedUrl: string;
   flipbookUrl: string;
+  sourceOrigin: string;
+  copyrightNote: string;
   featured: boolean;
   status: string;
   order: number;

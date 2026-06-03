@@ -1,65 +1,201 @@
-import Image from "next/image";
+import Hero from "@/components/Hero";
+import ResourceCard from "@/components/ResourceCard";
+import CategoryCard from "@/components/CategoryCard";
+import { getHomeData, type Resource } from "@/lib/api";
+import Link from "next/link";
 
-export default function Home() {
+export default async function HomePage() {
+  const homeData = await getHomeData();
+
+  const {
+    config,
+    categories,
+    featuredResources,
+    latestVideos,
+    latestPdfs,
+    latestAudios,
+  } = homeData;
+
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
+    <div className="bg-slate-50">
+      <Hero config={config} />
+
+      <section className="mx-auto max-w-7xl px-4 py-12">
+        <div className="grid gap-5 md:grid-cols-4">
+          <StatCard
+            number={featuredResources.length}
+            label="Tài liệu nổi bật"
+          />
+          <StatCard number={latestVideos.length} label="Video" />
+          <StatCard number={latestPdfs.length} label="PDF / Sách điện tử" />
+          <StatCard number={latestAudios.length} label="Audio" />
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+      </section>
+
+      <section className="mx-auto max-w-7xl px-4 py-10">
+        <div className="mb-8 flex items-end justify-between gap-4">
+          <div>
+            <p className="text-sm font-bold uppercase tracking-wide text-orange-500">
+              Nổi bật
+            </p>
+            <h2 className="mt-2 text-3xl font-extrabold text-slate-900">
+              Tài liệu được đề xuất
+            </h2>
+            <p className="mt-3 max-w-2xl text-slate-600">
+              Những nội dung tiêu biểu giúp bạn bắt đầu khám phá thư viện số Fly
+              To Sky.
+            </p>
+          </div>
+
+          <Link
+            href="/library"
+            className="hidden rounded-full border border-slate-200 bg-white px-5 py-2 text-sm font-semibold text-slate-700 hover:border-blue-500 hover:text-blue-600 md:inline-flex"
           >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+            Xem tất cả
+          </Link>
         </div>
-      </main>
+
+        {featuredResources?.length > 0 ? (
+          <div className="grid gap-6 md:grid-cols-3">
+            {featuredResources.slice(0, 6).map((item) => (
+              <ResourceCard key={item.id} resource={item} />
+            ))}
+          </div>
+        ) : (
+          <EmptyState text="Chưa có tài liệu nổi bật. Hãy kiểm tra cột NoiBat trong sheet TaiLieu." />
+        )}
+      </section>
+
+      <section className="bg-white py-16">
+        <div className="mx-auto max-w-7xl px-4">
+          <div className="mb-8">
+            <p className="text-sm font-bold uppercase tracking-wide text-blue-600">
+              Chủ đề
+            </p>
+            <h2 className="mt-2 text-3xl font-extrabold text-slate-900">
+              Khám phá theo chủ đề
+            </h2>
+            <p className="mt-3 max-w-2xl text-slate-600">
+              Tài liệu được sắp xếp theo các lĩnh vực cộng đồng, giáo dục và
+              phát triển con người.
+            </p>
+          </div>
+
+          {categories?.length > 0 ? (
+            <div className="grid gap-6 md:grid-cols-3">
+              {categories.map((item) => (
+                <CategoryCard key={item.code} category={item} />
+              ))}
+            </div>
+          ) : (
+            <EmptyState text="Chưa có chủ đề. Hãy kiểm tra sheet ChuDe." />
+          )}
+        </div>
+      </section>
+
+      <ResourceSection
+        title="Video mới nhất"
+        description="Những câu chuyện, bài học và nội dung truyền cảm hứng qua hình ảnh."
+        items={latestVideos}
+      />
+
+      <ResourceSection
+        title="PDF / Sách điện tử mới nhất"
+        description="Tài liệu đọc, sách điện tử và học liệu mở dành cho cộng đồng."
+        items={latestPdfs}
+      />
+
+      <ResourceSection
+        title="Audio mới nhất"
+        description="Nội dung nghe, podcast và tư liệu âm thanh có thể tiếp cận mọi lúc."
+        items={latestAudios}
+      />
+
+      <section className="mx-auto max-w-7xl px-4 py-16">
+        <div className="overflow-hidden rounded-[2rem] bg-gradient-to-br from-blue-700 via-blue-600 to-sky-500 p-8 text-white shadow-xl md:p-12">
+          <div className="grid gap-8 md:grid-cols-[1.4fr_0.6fr] md:items-center">
+            <div>
+              <p className="text-sm font-bold uppercase tracking-wide text-blue-100">
+                Fly To Sky Library
+              </p>
+              <h2 className="mt-3 text-3xl font-extrabold md:text-4xl">
+                Cùng lan tỏa tri thức mở vì cộng đồng
+              </h2>
+              <p className="mt-4 max-w-2xl leading-7 text-blue-50">
+                Thư viện số là nơi lưu giữ, chia sẻ và kết nối các tài liệu có
+                giá trị giáo dục, thiện nguyện và phát triển cộng đồng.
+              </p>
+            </div>
+
+            <div className="flex flex-wrap gap-3 md:justify-end">
+              <Link
+                href="/library"
+                className="rounded-full bg-orange-500 px-6 py-3 font-semibold text-white hover:bg-orange-600"
+              >
+                Khám phá ngay
+              </Link>
+              <Link
+                href="/about"
+                className="rounded-full bg-white/15 px-6 py-3 font-semibold text-white ring-1 ring-white/30 hover:bg-white/20"
+              >
+                Tìm hiểu thêm
+              </Link>
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
+  );
+}
+
+function StatCard({ number, label }: { number: number; label: string }) {
+  return (
+    <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
+      <p className="text-3xl font-extrabold text-blue-600">{number}</p>
+      <p className="mt-2 text-sm font-medium text-slate-600">{label}</p>
+    </div>
+  );
+}
+
+function ResourceSection({
+  title,
+  description,
+  items,
+}: {
+  title: string;
+  description: string;
+  items: Resource[];
+}) {
+  return (
+    <section className="mx-auto max-w-7xl px-4 py-14">
+      <div className="mb-8 flex items-end justify-between gap-4">
+        <div>
+          <h2 className="text-3xl font-extrabold text-slate-900">{title}</h2>
+          <p className="mt-3 max-w-2xl text-slate-600">{description}</p>
+        </div>
+
+        <Link href="/library" className="text-sm font-bold text-blue-600">
+          Xem thêm →
+        </Link>
+      </div>
+
+      {items?.length > 0 ? (
+        <div className="grid gap-6 md:grid-cols-3">
+          {items.slice(0, 3).map((item) => (
+            <ResourceCard key={item.id} resource={item} />
+          ))}
+        </div>
+      ) : (
+        <EmptyState text={`Chưa có dữ liệu cho mục ${title}.`} />
+      )}
+    </section>
+  );
+}
+
+function EmptyState({ text }: { text: string }) {
+  return (
+    <div className="rounded-3xl border border-dashed border-slate-300 bg-white p-8 text-center text-slate-500">
+      {text}
     </div>
   );
 }
