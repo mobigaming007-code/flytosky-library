@@ -66,6 +66,11 @@ export default function Footer() {
                   Giới thiệu
                 </Link>
               </li>
+              <li>
+                <Link href="/donate" className="hover:text-blue-600">
+                  Quyên góp
+                </Link>
+              </li>
             </ul>
           </div>
 

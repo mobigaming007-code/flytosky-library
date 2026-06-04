@@ -33,6 +33,10 @@ export default function Header() {
           <Link href="/about" className="hover:text-blue-600">
             Giới thiệu
           </Link>
+
+          <Link href="/donate" className="hover:text-blue-600">
+            Quyên góp
+          </Link>
         </nav>
 
         <Link
