@@ -2,6 +2,7 @@ import AudioExperience from "@/components/AudioExperience";
 import MediaViewer from "@/components/MediaViewer";
 import ResourceCard from "@/components/ResourceCard";
 import ShareButtons from "@/components/ShareButtons";
+import PartnerCTA from "@/components/PartnerCTA";
 import { getCategories, getResourceBySlug, getResources } from "@/lib/api";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -214,6 +215,7 @@ export default async function ResourceDetailPage({
             </div>
           )}
         </section>
+        <PartnerCTA />
       </div>
     </div>
   );

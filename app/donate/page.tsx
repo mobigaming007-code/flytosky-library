@@ -1,3 +1,4 @@
+import PartnerCTA from "@/components/PartnerCTA";
 import Link from "next/link";
 
 export const metadata = {
@@ -171,6 +172,9 @@ export default function DonatePage() {
             </ul>
           </aside>
         </div>
+      </section>
+      <section className="mx-auto max-w-7xl px-4 pb-16">
+        <PartnerCTA />
       </section>
     </div>
   );

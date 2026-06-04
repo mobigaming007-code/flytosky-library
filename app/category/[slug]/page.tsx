@@ -1,4 +1,5 @@
 import ResourceCard from "@/components/ResourceCard";
+import PartnerCTA from "@/components/PartnerCTA";
 import { getCategories, getResources } from "@/lib/api";
 
 type CategoryPageProps = {
@@ -59,6 +60,9 @@ export default async function CategoryPage({ params }: CategoryPageProps) {
             Chủ đề này chưa có tài liệu.
           </div>
         )}
+      </section>
+      <section className="mx-auto max-w-7xl px-4 pb-16">
+        <PartnerCTA />
       </section>
     </div>
   );

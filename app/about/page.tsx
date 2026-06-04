@@ -1,3 +1,5 @@
+import PartnerCTA from "@/components/PartnerCTA";
+
 export default function AboutPage() {
   return (
     <div className="mx-auto max-w-4xl px-4 py-16">
@@ -27,6 +29,8 @@ export default function AboutPage() {
           tìm kiếm, đọc, nghe và chia sẻ nội dung phù hợp.
         </p>
       </div>
+
+      <PartnerCTA />
     </div>
   );
 }
