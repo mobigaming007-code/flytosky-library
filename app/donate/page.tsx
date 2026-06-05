@@ -99,8 +99,8 @@ export default function DonatePage() {
                 <p>
                   Mọi đóng góp đều được cấp{" "}
                   <span className="font-bold">Giấy xác nhận ủng hộ</span>. Giấy
-                  xác nhận sẽ được tra cứu trên Hệ thống tra cứu Giấy chứng nhận
-                  của Hệ thống từ thiện Fly To Sky trong vòng{" "}
+                  xác nhận sẽ được tra cứu trên Cổng thông tin tra cứu Giấy
+                  chứng nhận của Hệ thống từ thiện Fly To Sky trong vòng{" "}
                   <span className="font-bold">7–10 ngày</span> kể từ khi Fly To
                   Sky nhận được thông tin đầy đủ gồm tên, SĐT/Email, số tiền
                   hoặc danh sách hiện vật.
