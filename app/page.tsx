@@ -97,18 +97,21 @@ export default async function HomePage() {
         title="Video mới nhất"
         description="Những câu chuyện, bài học và nội dung truyền cảm hứng qua hình ảnh."
         items={latestVideos}
+        href="/videos"
       />
 
       <ResourceSection
         title="PDF / Sách điện tử mới nhất"
         description="Tài liệu đọc, sách điện tử và học liệu mở dành cho cộng đồng."
         items={latestPdfs}
+        href="/ebooks"
       />
 
       <ResourceSection
         title="Audio mới nhất"
         description="Nội dung nghe, podcast và tư liệu âm thanh có thể tiếp cận mọi lúc."
         items={latestAudios}
+        href="/audios"
       />
 
       <section className="mx-auto max-w-7xl px-4 py-16">
@@ -161,10 +164,12 @@ function ResourceSection({
   title,
   description,
   items,
+  href,
 }: {
   title: string;
   description: string;
   items: Resource[];
+  href: string;
 }) {
   return (
     <section className="mx-auto max-w-7xl px-4 py-14">
@@ -174,7 +179,7 @@ function ResourceSection({
           <p className="mt-3 max-w-2xl text-slate-600">{description}</p>
         </div>
 
-        <Link href="/library" className="text-sm font-bold text-blue-600">
+        <Link href={href} className="text-sm font-bold text-blue-600">
           Xem thêm →
         </Link>
       </div>

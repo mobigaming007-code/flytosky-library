@@ -475,24 +475,24 @@ function AudioPlayerModal({
 }
 
 function AnimatedWaveform({ isPlaying }: { isPlaying: boolean }) {
-  const bars = Array.from({ length: 72 });
+  const bars = Array.from({ length: 48 });
 
   return (
-    <div className="flex h-28 items-center justify-center gap-1.5 rounded-[1.5rem] bg-white/5 px-4 ring-1 ring-white/10">
+    <div className="flex h-24 w-full items-center justify-center gap-1 overflow-hidden rounded-[1.5rem] bg-white/5 px-3 ring-1 ring-white/10 sm:h-28 sm:gap-1.5 sm:px-4">
       {bars.map((_, index) => {
         const delay = `${(index % 12) * 0.08}s`;
-        const isPink = index < 34;
+        const isPink = index < 24;
 
         return (
           <span
             key={index}
-            className={`block w-1.5 rounded-full ${
+            className={`block w-1 shrink-0 rounded-full sm:w-1.5 ${
               isPlaying ? "animate-[audioWave_1.2s_ease-in-out_infinite]" : ""
             } ${isPink ? "bg-pink-400" : "bg-blue-300"}`}
             style={{
-              height: `${18 + ((index * 13) % 46)}px`,
+              height: `${14 + ((index * 13) % 40)}px`,
               animationDelay: delay,
-              opacity: isPlaying ? 1 : 0.45,
+              opacity: isPlaying ? 1 : 0.5,
             }}
           />
         );
