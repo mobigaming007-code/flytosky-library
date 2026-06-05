@@ -1,11 +1,24 @@
 "use client";
 
-import { clearAdminToken } from "@/lib/adminClient";
+import {
+  adminRequest,
+  clearAdminToken,
+  getAdminToken,
+} from "@/lib/adminClient";
 import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname } from "next/navigation";
+import { useEffect, useState } from "react";
 
 type AdminShellProps = {
   children: React.ReactNode;
+};
+
+type MeData = {
+  user: {
+    email: string;
+    name: string;
+    role: string;
+  };
 };
 
 const menuItems = [
@@ -28,12 +41,67 @@ const menuItems = [
 ];
 
 export default function AdminShell({ children }: AdminShellProps) {
-  const router = useRouter();
   const pathname = usePathname();
 
-  function logout() {
-    clearAdminToken();
-    router.push("/admin/login");
+  const [checking, setChecking] = useState(true);
+  const [authorized, setAuthorized] = useState(false);
+
+  useEffect(() => {
+    let active = true;
+
+    async function checkSession() {
+      const token = getAdminToken();
+
+      if (!token) {
+        forceLogout();
+        return;
+      }
+
+      try {
+        await adminRequest<MeData>("adminGetMe");
+
+        if (!active) return;
+
+        setAuthorized(true);
+        setChecking(false);
+      } catch {
+        if (!active) return;
+
+        forceLogout();
+      }
+    }
+
+    checkSession();
+
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  function forceLogout() {
+    try {
+      clearAdminToken();
+      localStorage.removeItem("flytosky_admin_token");
+      sessionStorage.clear();
+    } catch {
+      // bỏ qua lỗi trình duyệt
+    }
+
+    window.location.href = "/admin/login";
+  }
+
+  if (checking || !authorized) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-slate-50 px-4">
+        <div className="text-center">
+          <div className="mx-auto h-10 w-10 animate-spin rounded-full border-4 border-blue-100 border-t-blue-600" />
+
+          <p className="mt-4 text-sm font-semibold text-slate-500">
+            Đang kiểm tra phiên đăng nhập...
+          </p>
+        </div>
+      </div>
+    );
   }
 
   return (
@@ -81,7 +149,7 @@ export default function AdminShell({ children }: AdminShellProps) {
 
             <button
               type="button"
-              onClick={logout}
+              onClick={forceLogout}
               className="rounded-full bg-slate-900 px-4 py-2 text-white hover:bg-slate-700"
             >
               Đăng xuất
@@ -90,7 +158,7 @@ export default function AdminShell({ children }: AdminShellProps) {
 
           <button
             type="button"
-            onClick={logout}
+            onClick={forceLogout}
             className="rounded-full bg-slate-900 px-4 py-2 text-sm font-semibold text-white md:hidden"
           >
             Thoát

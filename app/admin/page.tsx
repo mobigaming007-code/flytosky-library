@@ -1,129 +1,163 @@
 "use client";
 
-import { clearAdminToken } from "@/lib/adminClient";
+import AdminShell from "@/components/admin/AdminShell";
+import {
+  adminRequest,
+  clearAdminToken,
+  type AdminUser,
+} from "@/lib/adminClient";
 import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
+import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
 
-type AdminShellProps = {
-  children: React.ReactNode;
+type DashboardData = {
+  user: AdminUser;
+  stats: {
+    totalResources: number;
+    totalVideos: number;
+    totalAudios: number;
+    totalPdfs: number;
+    totalCategories: number;
+    totalFeatured: number;
+    totalHidden: number;
+  };
+  latestResources: Array<{
+    id: string;
+    title: string;
+    slug: string;
+    type: string;
+    status: string;
+  }>;
 };
 
-const menuItems = [
-  {
-    label: "Tổng quan",
-    href: "/admin",
-  },
-  {
-    label: "Tài liệu",
-    href: "/admin/resources",
-  },
-  {
-    label: "Chủ đề",
-    href: "/admin/categories",
-  },
-  {
-    label: "Kiểm tra link",
-    href: "/admin/link-checker",
-  },
-];
-
-export default function AdminShell({ children }: AdminShellProps) {
+export default function AdminDashboardPage() {
   const router = useRouter();
-  const pathname = usePathname();
 
-  function logout() {
-    clearAdminToken();
-    router.push("/admin/login");
+  const [data, setData] = useState<DashboardData | null>(null);
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    adminRequest<DashboardData>("adminGetDashboard")
+      .then((result) => {
+        setData(result);
+      })
+      .catch((err) => {
+        const message =
+          err instanceof Error ? err.message : "Không tải được dữ liệu.";
+
+        if (
+          message.includes("chưa đăng nhập") ||
+          message.includes("Bạn chưa đăng nhập") ||
+          message.includes("Phiên đăng nhập") ||
+          message.includes("hết hạn") ||
+          message.includes("không hợp lệ")
+        ) {
+          clearAdminToken();
+          router.replace("/admin/login");
+          return;
+        }
+
+        setError(message);
+      });
+  }, [router]);
+
+  if (error) {
+    return (
+      <AdminShell>
+        <div className="rounded-3xl bg-red-50 p-6 text-red-700">{error}</div>
+      </AdminShell>
+    );
+  }
+
+  if (!data) {
+    return (
+      <AdminShell>
+        <div className="rounded-3xl bg-white p-8 text-slate-500 shadow-sm">
+          Đang tải dashboard...
+        </div>
+      </AdminShell>
+    );
   }
 
   return (
-    <div className="min-h-screen bg-slate-50">
-      <header className="sticky top-0 z-40 border-b border-slate-200 bg-white/95 backdrop-blur">
-        <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-4">
-          <Link href="/admin" className="flex items-center gap-3">
-            <img
-              src="/logo.png"
-              alt="Fly To Sky"
-              className="h-9 w-9 rounded-xl object-contain"
-            />
+    <AdminShell>
+      <div>
+        <p className="text-sm font-bold uppercase tracking-wide text-blue-600">
+          Admin Dashboard
+        </p>
 
-            <div>
-              <p className="font-extrabold leading-none text-slate-900">
-                Fly To Sky Admin
-              </p>
-              <p className="mt-1 text-xs text-slate-500">
-                Quản trị thư viện số
-              </p>
-            </div>
-          </Link>
+        <h1 className="mt-2 text-3xl font-extrabold text-slate-900">
+          Xin chào, {data.user.name || data.user.email}
+        </h1>
 
-          <nav className="hidden items-center gap-2 text-sm font-semibold md:flex">
-            {menuItems.map((item) => {
-              const active =
-                item.href === "/admin"
-                  ? pathname === "/admin"
-                  : pathname.startsWith(item.href);
+        <p className="mt-2 text-slate-500">
+          Vai trò: <strong>{data.user.role}</strong>
+        </p>
+      </div>
 
-              return (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  className={`rounded-full px-4 py-2 transition ${
-                    active
-                      ? "bg-blue-600 text-white"
-                      : "text-slate-600 hover:bg-slate-100 hover:text-blue-600"
-                  }`}
-                >
-                  {item.label}
-                </Link>
-              );
-            })}
+      <div className="mt-8 grid gap-5 md:grid-cols-4">
+        <StatCard label="Tổng tài liệu" value={data.stats.totalResources} />
+        <StatCard label="Video" value={data.stats.totalVideos} />
+        <StatCard label="Audio" value={data.stats.totalAudios} />
+        <StatCard label="PDF/Sách điện tử" value={data.stats.totalPdfs} />
+        <StatCard label="Chủ đề" value={data.stats.totalCategories} />
+        <StatCard label="Nổi bật" value={data.stats.totalFeatured} />
+        <StatCard label="Đang ẩn" value={data.stats.totalHidden} />
+      </div>
 
-            <button
-              type="button"
-              onClick={logout}
-              className="rounded-full bg-slate-900 px-4 py-2 text-white hover:bg-slate-700"
-            >
-              Đăng xuất
-            </button>
-          </nav>
+      <div className="mt-10 rounded-[2rem] border border-slate-200 bg-white p-6 shadow-sm">
+        <div className="flex items-center justify-between gap-4">
+          <h2 className="text-xl font-extrabold text-slate-900">
+            Tài liệu mới cập nhật
+          </h2>
 
-          <button
-            type="button"
-            onClick={logout}
-            className="rounded-full bg-slate-900 px-4 py-2 text-sm font-semibold text-white md:hidden"
+          <Link
+            href="/admin/resources"
+            className="rounded-full bg-blue-600 px-5 py-2 text-sm font-semibold text-white hover:bg-blue-700"
           >
-            Thoát
-          </button>
+            Xem tất cả
+          </Link>
         </div>
 
-        <div className="border-t border-slate-100 bg-white px-4 py-3 md:hidden">
-          <div className="flex gap-2 overflow-x-auto">
-            {menuItems.map((item) => {
-              const active =
-                item.href === "/admin"
-                  ? pathname === "/admin"
-                  : pathname.startsWith(item.href);
+        <div className="mt-5 divide-y divide-slate-100">
+          {data.latestResources.length > 0 ? (
+            data.latestResources.map((item) => (
+              <div
+                key={item.id}
+                className="flex items-center justify-between gap-4 py-4"
+              >
+                <div>
+                  <p className="font-bold text-slate-900">{item.title}</p>
+                  <p className="mt-1 text-sm text-slate-500">
+                    {item.id} · {item.type} · {item.status}
+                  </p>
+                </div>
 
-              return (
                 <Link
-                  key={item.href}
-                  href={item.href}
-                  className={`shrink-0 rounded-full px-4 py-2 text-sm font-semibold ${
-                    active
-                      ? "bg-blue-600 text-white"
-                      : "bg-slate-100 text-slate-700"
-                  }`}
+                  href={`/${item.slug}`}
+                  target="_blank"
+                  className="text-sm font-semibold text-blue-600"
                 >
-                  {item.label}
+                  Xem
                 </Link>
-              );
-            })}
-          </div>
+              </div>
+            ))
+          ) : (
+            <div className="py-6 text-sm text-slate-500">
+              Chưa có tài liệu nào.
+            </div>
+          )}
         </div>
-      </header>
+      </div>
+    </AdminShell>
+  );
+}
 
-      <main className="mx-auto max-w-7xl px-4 py-10">{children}</main>
+function StatCard({ label, value }: { label: string; value: number }) {
+  return (
+    <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
+      <p className="text-3xl font-extrabold text-blue-600">{value}</p>
+      <p className="mt-2 text-sm font-semibold text-slate-500">{label}</p>
     </div>
   );
 }
