@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import CoverUploader from "@/components/admin/CoverUploader";
+import PdfUploader from "@/components/admin/PdfUploader";
 
 export type ResourceFormValue = {
   id?: string;
@@ -97,6 +98,21 @@ export default function ResourceForm({
     setForm((current) => ({
       ...current,
       [key]: value,
+    }));
+  }
+
+  function updatePdfUrl(value: string) {
+    const pdfUrl = value.trim();
+    const pdfEmbedUrl = toGoogleDrivePreviewUrl(pdfUrl);
+
+    setForm((current) => ({
+      ...current,
+      pdfUrl,
+      pdfEmbedUrl,
+      type:
+        current.type === "audio" || current.type === "video"
+          ? "combo"
+          : current.type || "pdf",
     }));
   }
 
@@ -277,20 +293,58 @@ export default function ResourceForm({
           />
         </Field>
 
+        <Field label="PDF / Sách điện tử">
+          <PdfUploader
+            objectId={form.id || form.slug || form.title}
+            onUploaded={(data) => {
+              setForm((current) => ({
+                ...current,
+                pdfUrl: data.pdfLink,
+                pdfEmbedUrl: data.pdfEmbedLink,
+                type:
+                  current.type === "audio" || current.type === "video"
+                    ? "combo"
+                    : "pdf",
+              }));
+            }}
+          />
+
+          <div className="mt-3 rounded-2xl bg-orange-50 p-4 text-xs leading-5 text-orange-700">
+            Sau khi upload hoặc dán PDF Link, hệ thống sẽ tự tạo{" "}
+            <strong>PDF Embed Link</strong>. PDF Link dùng để mở file gốc, còn
+            PDF Embed Link dùng để đọc trực tiếp trên website. File PDF không
+            nên vượt quá 15MB, trường hợp dung lượng lớn hãy upload lên Google
+            Drive và nhập link.
+          </div>
+        </Field>
+
         <Field label="PDF Link">
           <input
             value={form.pdfUrl}
-            onChange={(event) => update("pdfUrl", event.target.value)}
+            onChange={(event) => updatePdfUrl(event.target.value)}
+            onBlur={(event) => updatePdfUrl(event.target.value)}
             className="w-full rounded-2xl border border-slate-200 px-4 py-3 outline-none focus:border-blue-500"
+            placeholder="Dán link Google Drive PDF dạng /view hoặc /open?id="
           />
+
+          <p className="mt-2 text-xs leading-5 text-slate-500">
+            Chỉ cần dán PDF Link. Hệ thống sẽ tự chuyển sang PDF Embed Link dạng{" "}
+            <span className="font-semibold">/preview</span>.
+          </p>
         </Field>
 
-        <Field label="PDF Embed Link">
+        <Field label="PDF Embed Link tự động">
           <input
             value={form.pdfEmbedUrl}
-            onChange={(event) => update("pdfEmbedUrl", event.target.value)}
-            className="w-full rounded-2xl border border-slate-200 px-4 py-3 outline-none focus:border-blue-500"
+            readOnly
+            className="w-full cursor-not-allowed rounded-2xl border border-slate-200 bg-slate-100 px-4 py-3 text-slate-500 outline-none"
+            placeholder="Tự động tạo từ PDF Link"
           />
+
+          <p className="mt-2 text-xs leading-5 text-slate-500">
+            Ô này đã khóa để tránh nhập sai link nhúng. Nếu muốn sửa, hãy sửa
+            lại PDF Link phía trên.
+          </p>
         </Field>
 
         <Field label="Audio Link nguồn">
@@ -432,4 +486,44 @@ function slugify(text: string) {
     .trim()
     .replace(/\s+/g, "-")
     .replace(/-+/g, "-");
+}
+
+function extractGoogleDriveFileId(url?: string) {
+  if (!url) return "";
+
+  const value = String(url).trim();
+
+  const fileMatch = value.match(/\/file\/d\/([^/]+)/);
+  if (fileMatch?.[1]) return fileMatch[1];
+
+  const idMatch = value.match(/[?&]id=([^&]+)/);
+  if (idMatch?.[1]) return idMatch[1];
+
+  const ucMatch = value.match(/\/uc\?export=download&id=([^&]+)/);
+  if (ucMatch?.[1]) return ucMatch[1];
+
+  return "";
+}
+
+function toGoogleDrivePreviewUrl(url?: string) {
+  if (!url) return "";
+
+  const value = String(url).trim();
+
+  if (!value) return "";
+
+  if (
+    value.includes("drive.google.com/file/d/") &&
+    value.includes("/preview")
+  ) {
+    return value;
+  }
+
+  const fileId = extractGoogleDriveFileId(value);
+
+  if (fileId) {
+    return `https://drive.google.com/file/d/${fileId}/preview`;
+  }
+
+  return value;
 }
