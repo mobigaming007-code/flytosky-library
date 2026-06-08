@@ -94,7 +94,7 @@ export default function DonatePage() {
           <SupportCard
             number="01"
             title="Ghi đúng cú pháp"
-            description="Vui lòng ghi đúng cú pháp THUVIEN + HỌ VÀ TÊN + SĐT/EMAIL để được ghi nhận nhanh."
+            description="Vui lòng ghi đúng cú pháp TUSACH + HỌ VÀ TÊN + SĐT/EMAIL để được ghi nhận nhanh."
           />
 
           <SupportCard
