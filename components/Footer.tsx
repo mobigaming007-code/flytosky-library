@@ -24,9 +24,11 @@ export default function Footer() {
             </div>
 
             <p className="mt-5 max-w-xl text-sm leading-7 text-slate-600">
-              Nền tảng lưu trữ và chia sẻ học liệu mở của Hệ thống từ thiện Fly
-              To Sky, giúp cộng đồng có thể xem video, nghe audio và đọc tài
-              liệu miễn phí.
+              Thư viện số vì cộng đồng là sáng kiến thuộc Dự án Tủ sách Bồ câu
+              trắng do Hệ thống từ thiện Fly To Sky phát triển từ năm 2026, là
+              nền tảng lưu trữ và chia sẻ học liệu mở, giúp cộng đồng dễ dàng
+              xem video, nghe audio và đọc tài liệu hoàn toàn miễn phí, mọi lúc,
+              mọi nơi.
             </p>
 
             <div className="mt-5 flex flex-wrap gap-2 text-xs font-medium">

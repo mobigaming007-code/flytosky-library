@@ -25,7 +25,7 @@ export default function Hero({ config }: HeroProps) {
           <p className="mt-6 max-w-xl text-lg leading-8 text-blue-50">
             {String(
               config?.banner_subtitle ||
-                "Khám phá tri thức, câu chuyện và học liệu mở từ Hệ thống từ thiện Fly To Sky.",
+                "Thuộc dự án Tủ sách Bồ câu trắng do Hệ thống từ thiện Fly To Sky phát triển từ năm 2026 nhằm lan tỏa tri thức và mở rộng cơ hội tiếp cận tài nguyên học tập cho mọi người. Dự án xây dựng nền tảng đọc và học tập trực tuyến, giúp cộng đồng, đặc biệt là trẻ em và học sinh ở khu vực khó khăn, có thể tiếp cận sách và kiến thức mọi lúc, mọi nơi.",
             )}
           </p>
 

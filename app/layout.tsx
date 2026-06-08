@@ -27,7 +27,7 @@ export const metadata: Metadata = {
     title: "Thư viện số Fly To Sky",
     description:
       "Không gian học liệu mở: xem video, nghe audio và đọc PDF miễn phí.",
-    url: "https://flytosky-library.vercel.app",
+    url: "https://library.flytoskycharity.vn/admin/login",
     siteName: "Thư viện số Fly To Sky",
     images: [
       {

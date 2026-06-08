@@ -1,7 +1,7 @@
 import type { MetadataRoute } from "next";
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  const baseUrl = "https://flytosky-library1.vercel.app";
+  const baseUrl = "https://library.flytoskycharity.vn/admin/login";
 
   return [
     {
