@@ -18,6 +18,7 @@ type MeData = {
     email: string;
     name: string;
     role: string;
+    mustChangePassword?: boolean;
   };
 };
 
@@ -35,8 +36,24 @@ const menuItems = [
     href: "/admin/categories",
   },
   {
+    label: "Tác giả",
+    href: "/admin/authors",
+  },
+  {
+    label: "Thống kê",
+    href: "/admin/statistics",
+  },
+  {
     label: "Kiểm tra link",
     href: "/admin/link-checker",
+  },
+  {
+    label: "Nhật ký",
+    href: "/admin/audit-log",
+  },
+  {
+    label: "Đổi mật khẩu",
+    href: "/admin/change-password",
   },
 ];
 
@@ -58,7 +75,15 @@ export default function AdminShell({ children }: AdminShellProps) {
       }
 
       try {
-        await adminRequest<MeData>("adminGetMe");
+        const me = await adminRequest<MeData>("adminGetMe");
+
+        if (
+          me.user.mustChangePassword &&
+          window.location.pathname !== "/admin/change-password"
+        ) {
+          window.location.href = "/admin/change-password";
+          return;
+        }
 
         if (!active) return;
 

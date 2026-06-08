@@ -3,6 +3,8 @@ import MediaViewer from "@/components/MediaViewer";
 import ResourceCard from "@/components/ResourceCard";
 import ShareButtons from "@/components/ShareButtons";
 import PartnerCTA from "@/components/PartnerCTA";
+import ResourceTracker from "@/components/ResourceTracker";
+import TrackedResourceLink from "@/components/TrackedResourceLink";
 import { getAuthorSlug, splitAuthors } from "@/lib/authors";
 import { getCategories, getResourceBySlug, getResources } from "@/lib/api";
 import Link from "next/link";
@@ -52,6 +54,8 @@ export default async function ResourceDetailPage({
 
   return (
     <div className="bg-slate-50">
+      <ResourceTracker resourceId={resource.id} slug={resource.slug} />
+
       <div className="mx-auto max-w-6xl px-4 py-12">
         {isAudioExperience ? (
           <AudioExperience resource={resource} categoryName={categoryName} />
@@ -88,47 +92,51 @@ export default async function ResourceDetailPage({
                     <ShareButtons title={resource.title} />
 
                     {youtubeOriginalUrl && (
-                      <a
+                      <TrackedResourceLink
                         href={youtubeOriginalUrl}
-                        target="_blank"
-                        rel="noreferrer"
+                        resourceId={resource.id}
+                        slug={resource.slug}
+                        eventType="open_original"
                         className="inline-flex rounded-full border border-slate-200 bg-white px-5 py-2 text-sm font-semibold text-slate-700 hover:border-blue-500 hover:text-blue-600"
                       >
                         Mở video gốc
-                      </a>
+                      </TrackedResourceLink>
                     )}
 
                     {resource.pdfUrl && (
-                      <a
+                      <TrackedResourceLink
                         href={resource.pdfUrl}
-                        target="_blank"
-                        rel="noreferrer"
+                        resourceId={resource.id}
+                        slug={resource.slug}
+                        eventType="read"
                         className="inline-flex rounded-full border border-slate-200 bg-white px-5 py-2 text-sm font-semibold text-slate-700 hover:border-orange-500 hover:text-orange-600"
                       >
                         Mở / tải PDF gốc
-                      </a>
+                      </TrackedResourceLink>
                     )}
 
                     {resource.audioUrl && (
-                      <a
+                      <TrackedResourceLink
                         href={resource.audioUrl}
-                        target="_blank"
-                        rel="noreferrer"
+                        resourceId={resource.id}
+                        slug={resource.slug}
+                        eventType="listen"
                         className="inline-flex rounded-full border border-slate-200 bg-white px-5 py-2 text-sm font-semibold text-slate-700 hover:border-green-500 hover:text-green-600"
                       >
                         Mở / tải audio gốc
-                      </a>
+                      </TrackedResourceLink>
                     )}
 
                     {resource.flipbookUrl && (
-                      <a
+                      <TrackedResourceLink
                         href={resource.flipbookUrl}
-                        target="_blank"
-                        rel="noreferrer"
+                        resourceId={resource.id}
+                        slug={resource.slug}
+                        eventType="read"
                         className="inline-flex rounded-full border border-slate-200 bg-white px-5 py-2 text-sm font-semibold text-slate-700 hover:border-purple-500 hover:text-purple-600"
                       >
                         Mở sách điện tử
-                      </a>
+                      </TrackedResourceLink>
                     )}
                   </div>
                 </div>
@@ -219,6 +227,7 @@ export default async function ResourceDetailPage({
             </div>
           )}
         </section>
+
         <PartnerCTA />
       </div>
     </div>

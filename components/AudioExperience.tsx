@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useMemo, useRef, useState } from "react";
+import { trackResourceEvent } from "@/lib/track";
 import type { Resource } from "@/lib/api";
 
 type AudioExperienceProps = {
@@ -21,8 +22,6 @@ export default function AudioExperience({
   const audioSrc = useMemo(() => {
     return resource.audioEmbedUrl || "";
   }, [resource.audioEmbedUrl]);
-
-  const sourcePageUrl = resource.audioUrl || resource.audioEmbedUrl || "";
 
   const languageLabel = getLanguageLabel(resource.language);
 
@@ -44,6 +43,16 @@ export default function AudioExperience({
     } catch {
       // Người dùng hủy chia sẻ thì bỏ qua
     }
+  }
+
+  async function handleOpenPlayer() {
+    await trackResourceEvent({
+      resourceId: resource.id,
+      slug: resource.slug,
+      eventType: "listen",
+    });
+
+    setOpenPlayer(true);
   }
 
   return (
@@ -102,7 +111,7 @@ export default function AudioExperience({
               <div className="mt-7 flex flex-wrap gap-3">
                 <button
                   type="button"
-                  onClick={() => setOpenPlayer(true)}
+                  onClick={handleOpenPlayer}
                   className="inline-flex items-center justify-center rounded-full bg-pink-500 px-7 py-3 text-sm font-bold text-white shadow-lg shadow-pink-200 transition hover:-translate-y-0.5 hover:bg-pink-600"
                 >
                   ▶ Nghe ngay
@@ -211,7 +220,6 @@ export default function AudioExperience({
         <AudioPlayerModal
           resource={resource}
           audioSrc={audioSrc}
-          sourcePageUrl={sourcePageUrl}
           onClose={() => setOpenPlayer(false)}
         />
       )}
@@ -222,12 +230,10 @@ export default function AudioExperience({
 function AudioPlayerModal({
   resource,
   audioSrc,
-  sourcePageUrl,
   onClose,
 }: {
   resource: Resource;
   audioSrc: string;
-  sourcePageUrl: string;
   onClose: () => void;
 }) {
   const audioRef = useRef<HTMLAudioElement | null>(null);
@@ -301,6 +307,12 @@ function AudioPlayerModal({
     if (!audio) return;
 
     if (audio.paused) {
+      await trackResourceEvent({
+        resourceId: resource.id,
+        slug: resource.slug,
+        eventType: "listen",
+      });
+
       await audio.play();
     } else {
       audio.pause();
