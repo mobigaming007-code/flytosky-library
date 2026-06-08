@@ -29,10 +29,15 @@ export default function InlineAudioPlayer({
   const progress = duration > 0 ? (currentTime / duration) * 100 : 0;
 
   useEffect(() => {
-    const audio = audioRef.current;
-    if (!audio || !audioUrl) return;
+    if (!audioUrl) return;
+
+    const audioEl = audioRef.current;
+    if (!audioEl) return;
 
     function syncDuration() {
+      const audio = audioRef.current;
+      if (!audio) return;
+
       const value = audio.duration;
 
       if (Number.isFinite(value) && value > 0) {
@@ -53,6 +58,9 @@ export default function InlineAudioPlayer({
     }
 
     function handleTimeUpdate() {
+      const audio = audioRef.current;
+      if (!audio) return;
+
       setCurrentTime(audio.currentTime || 0);
       syncDuration();
     }
@@ -70,24 +78,24 @@ export default function InlineAudioPlayer({
       setIsPlaying(false);
     }
 
-    audio.addEventListener("loadedmetadata", handleLoadedMetadata);
-    audio.addEventListener("durationchange", handleDurationChange);
-    audio.addEventListener("canplay", handleCanPlay);
-    audio.addEventListener("timeupdate", handleTimeUpdate);
-    audio.addEventListener("play", handlePlay);
-    audio.addEventListener("pause", handlePause);
-    audio.addEventListener("ended", handleEnded);
+    audioEl.addEventListener("loadedmetadata", handleLoadedMetadata);
+    audioEl.addEventListener("durationchange", handleDurationChange);
+    audioEl.addEventListener("canplay", handleCanPlay);
+    audioEl.addEventListener("timeupdate", handleTimeUpdate);
+    audioEl.addEventListener("play", handlePlay);
+    audioEl.addEventListener("pause", handlePause);
+    audioEl.addEventListener("ended", handleEnded);
 
-    audio.load();
+    audioEl.load();
 
     return () => {
-      audio.removeEventListener("loadedmetadata", handleLoadedMetadata);
-      audio.removeEventListener("durationchange", handleDurationChange);
-      audio.removeEventListener("canplay", handleCanPlay);
-      audio.removeEventListener("timeupdate", handleTimeUpdate);
-      audio.removeEventListener("play", handlePlay);
-      audio.removeEventListener("pause", handlePause);
-      audio.removeEventListener("ended", handleEnded);
+      audioEl.removeEventListener("loadedmetadata", handleLoadedMetadata);
+      audioEl.removeEventListener("durationchange", handleDurationChange);
+      audioEl.removeEventListener("canplay", handleCanPlay);
+      audioEl.removeEventListener("timeupdate", handleTimeUpdate);
+      audioEl.removeEventListener("play", handlePlay);
+      audioEl.removeEventListener("pause", handlePause);
+      audioEl.removeEventListener("ended", handleEnded);
     };
   }, [audioUrl]);
 
@@ -260,21 +268,6 @@ function Waveform({ isPlaying }: { isPlaying: boolean }) {
           />
         );
       })}
-
-      <style jsx>{`
-        @keyframes audioWave {
-          0%,
-          100% {
-            transform: scaleY(0.45);
-            opacity: 0.55;
-          }
-
-          50% {
-            transform: scaleY(1.25);
-            opacity: 1;
-          }
-        }
-      `}</style>
     </div>
   );
 }
