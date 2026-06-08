@@ -8,6 +8,7 @@ import TrackedResourceLink from "@/components/TrackedResourceLink";
 import { getAuthorSlug, splitAuthors } from "@/lib/authors";
 import { getCategories, getResourceBySlug, getResources } from "@/lib/api";
 import Link from "next/link";
+import InlineAudioPlayer from "@/components/InlineAudioPlayer";
 import { notFound } from "next/navigation";
 
 type ResourceDetailPageProps = {
@@ -115,18 +116,6 @@ export default async function ResourceDetailPage({
                       </TrackedResourceLink>
                     )}
 
-                    {resource.audioUrl && (
-                      <TrackedResourceLink
-                        href={resource.audioUrl}
-                        resourceId={resource.id}
-                        slug={resource.slug}
-                        eventType="listen"
-                        className="inline-flex rounded-full border border-slate-200 bg-white px-5 py-2 text-sm font-semibold text-slate-700 hover:border-green-500 hover:text-green-600"
-                      >
-                        Mở / tải audio gốc
-                      </TrackedResourceLink>
-                    )}
-
                     {resource.flipbookUrl && (
                       <TrackedResourceLink
                         href={resource.flipbookUrl}
@@ -141,7 +130,25 @@ export default async function ResourceDetailPage({
                   </div>
                 </div>
 
-                <MediaViewer resource={resource} />
+                {(resource.audioEmbedUrl || resource.audioUrl) && (
+                  <InlineAudioPlayer
+                    resourceId={resource.id}
+                    slug={resource.slug}
+                    title={resource.title}
+                    author={resource.author}
+                    coverUrl={resource.coverUrl}
+                    audioUrl={resource.audioEmbedUrl || resource.audioUrl}
+                  />
+                )}
+
+                <MediaViewer
+                  resource={{
+                    ...resource,
+                    audioUrl: "",
+                    audioEmbedUrl: "",
+                    hasAudio: false,
+                  }}
+                />
               </div>
 
               <aside className="h-fit rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
