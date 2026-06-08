@@ -53,6 +53,18 @@ export default async function ResourceDetailPage({
     ? `https://www.youtube.com/watch?v=${resource.youtubeId}`
     : "";
 
+  const directAudioUrl = getDirectAudioUrl(
+    resource.audioEmbedUrl,
+    resource.audioUrl,
+  );
+
+  const shouldUseInlineAudio = Boolean(directAudioUrl);
+
+  const shouldKeepMediaViewerAudio = hasNonDirectAudio(
+    resource.audioEmbedUrl,
+    resource.audioUrl,
+  );
+
   return (
     <div className="bg-slate-50">
       <ResourceTracker resourceId={resource.id} slug={resource.slug} />
@@ -130,24 +142,31 @@ export default async function ResourceDetailPage({
                   </div>
                 </div>
 
-                {(resource.audioEmbedUrl || resource.audioUrl) && (
+                {shouldUseInlineAudio && (
                   <InlineAudioPlayer
                     resourceId={resource.id}
                     slug={resource.slug}
                     title={resource.title}
                     author={resource.author}
                     coverUrl={resource.coverUrl}
-                    audioUrl={resource.audioEmbedUrl || resource.audioUrl}
+                    audioUrl={directAudioUrl}
                   />
                 )}
 
                 <MediaViewer
-                  resource={{
-                    ...resource,
-                    audioUrl: "",
-                    audioEmbedUrl: "",
-                    hasAudio: false,
-                  }}
+                  resource={
+                    shouldUseInlineAudio
+                      ? {
+                          ...resource,
+                          audioUrl: "",
+                          audioEmbedUrl: "",
+                          hasAudio: false,
+                        }
+                      : {
+                          ...resource,
+                          hasAudio: shouldKeepMediaViewerAudio,
+                        }
+                  }
                 />
               </div>
 
@@ -341,4 +360,39 @@ function getLanguageLabel(language?: string) {
   };
 
   return map[value] || language || "Đang cập nhật";
+}
+
+function isDirectAudioFile(url?: string) {
+  const value = String(url || "")
+    .toLowerCase()
+    .trim();
+
+  if (!value) return false;
+
+  return (
+    value.includes(".mp3") ||
+    value.includes(".wav") ||
+    value.includes(".ogg") ||
+    value.includes(".m4a") ||
+    value.includes(".aac")
+  );
+}
+
+function getDirectAudioUrl(audioEmbedUrl?: string, audioUrl?: string) {
+  const embed = String(audioEmbedUrl || "").trim();
+  const source = String(audioUrl || "").trim();
+
+  if (isDirectAudioFile(embed)) return embed;
+  if (isDirectAudioFile(source)) return source;
+
+  return "";
+}
+
+function hasNonDirectAudio(audioEmbedUrl?: string, audioUrl?: string) {
+  const embed = String(audioEmbedUrl || "").trim();
+  const source = String(audioUrl || "").trim();
+
+  if (!embed && !source) return false;
+
+  return !getDirectAudioUrl(embed, source);
 }

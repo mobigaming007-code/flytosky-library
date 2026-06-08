@@ -248,11 +248,9 @@ function Waveform({ isPlaying }: { isPlaying: boolean }) {
         return (
           <span
             key={index}
-            className={`block w-1 shrink-0 rounded-full ${
+            className={`audio-wave-bar block w-1 shrink-0 rounded-full ${
               index % 2 === 0 ? "bg-pink-400" : "bg-blue-300"
-            } ${
-              isPlaying ? "animate-[audioWave_1.15s_ease-in-out_infinite]" : ""
-            }`}
+            } ${isPlaying ? "audio-wave-bar-playing" : ""}`}
             style={{
               height: `${height}px`,
               animationDelay: delay,
