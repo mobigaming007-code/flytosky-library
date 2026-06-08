@@ -55,6 +55,10 @@ const menuItems = [
     label: "Đổi mật khẩu",
     href: "/admin/change-password",
   },
+  {
+    label: "Tài khoản",
+    href: "/admin/accounts",
+  },
 ];
 
 export default function AdminShell({ children }: AdminShellProps) {
